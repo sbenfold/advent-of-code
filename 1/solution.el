@@ -6,7 +6,7 @@
    (-map (-partial #'-map #'string-to-number))
    (-unzip)
    (--map (-sort #'< it))
-   (-reduce (-partial #'-zip-with #'-))
+   (apply #'-zip-with #'-)
    (-map #'abs)
    (-sum)
    )
