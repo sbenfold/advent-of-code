@@ -1,7 +1,6 @@
 (->> (f-read-text "example-input.txt")
    (s-trim)
    (s-lines)
-   (-map #'s-collapse-whitespace)
    (-map #'s-split-words)
    (-map (-partial #'-map #'string-to-number))
    (-unzip)
