@@ -7,11 +7,14 @@
   (->> (f-read-text "input.txt")
      (s-trim)))
 
+(defun aoc/3/helper (xs)
+  (->> xs
+       (-drop 1)
+       (-map #'string-to-number)
+       (-product)))
+
 ;; 3a
 (->>
  (s-match-strings-all "mul(\\([0-9]+\\),\\([0-9]+\\))" (aoc/3/read-input))
- (--map (-drop 1 it))
- (--map (-map #'string-to-number it))
- (--map (apply #'* it))
- (-sum)
- )
+ (-map #'aoc/3/helper)
+ (-sum))
