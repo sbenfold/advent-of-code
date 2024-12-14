@@ -7,18 +7,11 @@
   (->> (f-read-text "input.txt")
      (s-trim)))
 
-(iter-defun aoc/3/expr-generator ()
-  (let* ((input (aoc/3/read-input))
-         (pos 0))
-    (while (string-match "mul(\\([0-9]+\\),\\([0-9]+\\))" input pos)
-      (iter-yield (-map #'string-to-number (list (match-string 1 input)
-                                                 (match-string 2 input))))
-      (setq pos (match-end 0)))))
-
 ;; 3a
 (->>
- (cl-loop for x
-          iter-by (aoc/3/expr-generator)
-          collect x)
+ (s-match-strings-all "mul(\\([0-9]+\\),\\([0-9]+\\))" (aoc/3/read-input))
+ (--map (-drop 1 it))
+ (--map (-map #'string-to-number it))
  (--map (apply #'* it))
- (-sum))
+ (-sum)
+ )
