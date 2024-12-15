@@ -2,8 +2,8 @@
 
 (require 'generator)
 
-;; (defconst aoc/4/input-file "input.txt")
-(defconst aoc/4/input-file "example-input-a1.txt")
+(defconst aoc/4/input-file "input.txt")
+;; (defconst aoc/4/input-file "example-input-a1.txt")
 ;; (defconst aoc/4/input-file "example-input-a2.txt")
 
 (defun aoc/4/read-input ()
@@ -59,6 +59,25 @@
    )
   )
 
+(defun aoc/4/iter-all (input w h)
+  (append
+   (aoc/4/iter-horiz input w h)
+   (aoc/4/iter-vert input w h)
+   (aoc/4/iter-diag-br input w h)
+   (aoc/4/iter-diag-bl input w h)
+   )
+  )
+
+(defun aoc/4/count (inputs)
+  (->>
+   inputs
+   (--map (s-match-strings-all "XMAS\\|SAMX" it))
+   (-non-nil)
+   (-flatten)
+   (length)
+   )
+  )
+
 ;; 4a
 (let* ((raw-input (f-read-text aoc/4/input-file))
        (input (->> raw-input
@@ -67,26 +86,7 @@
        (w (s-index-of "\n" raw-input))
        (h (/ (length input) w))
        )
-  ;; raw-input
-  ;; (aoc/4/iter-horiz input w h)
-  ;; (aoc/4/iter-vert input w h)
-  ;; (aoc/4/iter-diag-br input w h)
-  ;; (aoc/4/get-diag-br input w h 0 0)
-  ;; (aoc/4/get-diag-br input w h 0 1)
-  ;; (aoc/4/get-diag-br input w h 1 0)
-  ;; (aoc/4/get-diag-bl input w h 5 3)
-  (aoc/4/iter-diag-bl input w h)
+  (aoc/4/count
+   (aoc/4/iter-all input w h)
+   )
   )
-
-;; TODO Generate the following:
-;;   1) TODO Reach row
-;;   2) TODO Reach row
-;;   3) TODO Each DR diagonal
-;;   4) TODO Each DL diagonal
-;; TODO Iterate over each generator
-;;   TODO Search forwards and backwards for every occurrence
-;; TODO Sum
-
-;; (s-match-strings-all "mul(\\([0-9]+\\),\\([0-9]+\\))" (aoc/3/read-input))
-;; (-map #'aoc/3/helper)
-;; (-sum)
