@@ -90,3 +90,42 @@
    (aoc/4/iter-all input w h)
    )
   )
+
+(defun aoc/4b/is-mas (a b)
+  (or
+   (and (eq a ?M) (eq b ?S))
+   (and (eq b ?M) (eq a ?S))
+   )
+  )
+
+(defun aoc/4b/try-pos (input w x y)
+  (and
+   (eq (aref input (+ (* y w) x)) ?A)
+   (aoc/4b/is-mas
+    (aref input (+ (* (1- y) w) (1- x)))
+    (aref input (+ (* (1+ y) w) (1+ x)))
+    )
+   (aoc/4b/is-mas
+    (aref input (+ (* (1- y) w) (1+ x)))
+    (aref input (+ (* (1+ y) w) (1- x)))
+    )
+   )
+  )
+
+(defun aoc/4b/iter-row (input w y)
+  (--map (aoc/4b/try-pos input w it y) (-iota (- w 2) 1))
+  )
+
+;; 4b
+(let* ((raw-input (f-read-text aoc/4/input-file))
+       (input (->> raw-input
+                 (s-lines)
+                 (-reduce #'s-concat)))
+       (w (s-index-of "\n" raw-input))
+       (h (/ (length input) w))
+       )
+  (->> (-iota (- h 2) 1)
+     (--map (aoc/4b/iter-row input w it))
+     (-flatten)
+     (length)
+     ))
