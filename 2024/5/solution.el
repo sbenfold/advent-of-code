@@ -68,13 +68,21 @@
                            (ht-get deps-ht (nth (1+ error-index) pages))
                            (-take (1+ error-index) pages)
                            )))
-        ;; TODO Find index of (car intersection) and insert it at error-index
+        ;; TODO Instead of moving dependent in front of us, move us to before dependency
         (let* ((old-index (-elem-index (car intersection) pages))
-               (new-pages (-remove-at old-index
-                                      (-insert-at (+ error-index 2) (nth old-index pages) pages)
-                                      ))
+               (error-val (nth (1+ error-index) pages))
+               (new-pages (-insert-at old-index error-val (-remove-at (1+ error-index) pages)))
+               ;; (-insert-at (+ error-index 2) (nth old-index pages) pages)
                )
+          ;; new-pages
           ;; (message "Recurse %s -> %s" pages new-pages)
+          ;; (message "Recurse error index %s -> %s" new-pages (--find-index
+          ;;                                                   (-intersection
+          ;;                                                    (ht-get deps-ht (nth it new-pages))
+          ;;                                                    (-take it new-pages)
+          ;;                                                    )
+          ;;                                                   (-iota (length new-pages) 1)
+          ;;                                                   ))
           (aoc/5b/fix-update new-pages deps-ht)
           )
 
