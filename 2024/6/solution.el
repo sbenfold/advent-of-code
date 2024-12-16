@@ -9,11 +9,16 @@
   (+ (car loc)
      (* (cdr loc) w)))
 
+(defun aoc/6/turn-right (dir)
+  (cons (- (cdr dir)) (car dir)))
+
+(defun aoc/6/add-vecs (v1 v2)
+  (cons (+ (car v1) (car v2))
+        (+ (cdr v1) (cdr v2))))
+
 (defun aoc/6/try-loc (input w h current-loc current-dir)
-  (let* ((test-loc (cons (+ (car current-loc) (car current-dir))
-                         (+ (cdr current-loc) (cdr current-dir))))
+  (let* ((test-loc (aoc/6/add-vecs current-loc current-dir))
          (test-index (aoc/6/loc-to-index w test-loc)))
-    (message "%s -> %s" current-loc test-loc)
     (cond
      ((< (car test-loc) 0) :outside)
      ((>= (car test-loc) w) :outside)
@@ -23,6 +28,12 @@
      (t :free)
      )
     ))
+
+(defun aoc/6/calc-dir (input w h current-loc dir)
+  (cl-ecase (aoc/6/try-loc input w h current-loc dir)
+    (:free dir)
+    (:blocked (aoc/6/calc-dir input w h current-loc (aoc/6/turn-right dir)))
+    (:outside nil)))
 
 ;; 6a
 (let* ((raw-input (f-read-text aoc/6/input-file))
@@ -35,34 +46,16 @@
        (current-loc (cons (% current-index w) (/ current-index w)))
        (current-dir '(0 . -1))
        )
-  ;; (while current-loc
-  (message "Current loc: %s" current-loc)
-  (aset input current-index ?X)
-  ;; TODO This depends on dir
-  ;; TODO Rotate 90 = (-y, x)
 
-  ;; (aoc/6/try-loc input w h current-loc current-dir)
-  (cl-ecase (aoc/6/try-loc input w h current-loc current-dir)
-    ;; TODO Break out of iteration
-    (:free "free")
-    ;; TODO Rotate 90
-    (:blocked "blocked")
-    ;; TODO Stop algorithm
-    (:outside "outside"))
-  ;; (let ((new-loc nil))
-  ;;   (while (null new-loc)
-  ;;     (let ((test-loc (+ current-loc
-  ;;                        (car current-dir)
-  ;;                        (* (cdr current-dir) w))))
-  ;;       (when (< test-loc 0)
-  ;;         (setq test-loc nil))
-  ;;       (while (eq? (aref input test-loc) ?#)
-  ;;         (setq current-dir (cons (- (cdr current-dir)) (car current-dir))))
-  ;;       ;; TODO Recalculate test-loc
-  ;;       (setq current-loc test-loc))))
-  ;; )
-  ;; TODO Set current location to X
-  ;; TODO Calculate next location
-  ;;   TODO If next location is # then turn right
-  ;;   TODO If next location is out of bounds then stop
+  (while current-loc
+    ;; (message "Current loc: %s" current-loc)
+    (aset input current-index ?X)
+    (let ((dir (aoc/6/calc-dir input w h current-loc current-dir)))
+      (setq current-dir dir)
+      (if (not current-dir)
+          (setq current-loc nil)
+        (setq current-loc (aoc/6/add-vecs current-loc current-dir))
+        (setq current-index (aoc/6/loc-to-index w current-loc))
+        )))
+  (s-count-matches "X" input)
   )
