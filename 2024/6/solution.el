@@ -35,27 +35,72 @@
     (:blocked (aoc/6/calc-dir input w h current-loc (aoc/6/turn-right dir)))
     (:outside nil)))
 
-;; 6a
-(let* ((raw-input (f-read-text aoc/6/input-file))
-       (input (->> raw-input
-                 (s-lines)
-                 (-reduce #'s-concat)))
-       (w (s-index-of "\n" raw-input))
-       (h (/ (length input) w))
-       (current-index (s-index-of "^" input))
-       (current-loc (cons (% current-index w) (/ current-index w)))
-       (current-dir '(0 . -1))
-       )
+(defun aoc/6/parse-input ()
+  (let* ((raw-input (f-read-text aoc/6/input-file))
+         (input (->> raw-input
+                   (s-lines)
+                   (-reduce #'s-concat)))
+         (w (s-index-of "\n" raw-input)))
+    (list input w (s-index-of "^" input))))
 
-  (while current-loc
-    ;; (message "Current loc: %s" current-loc)
-    (aset input current-index ?X)
-    (let ((dir (aoc/6/calc-dir input w h current-loc current-dir)))
-      (setq current-dir dir)
-      (if (not current-dir)
-          (setq current-loc nil)
-        (setq current-loc (aoc/6/add-vecs current-loc current-dir))
-        (setq current-index (aoc/6/loc-to-index w current-loc))
-        )))
-  (s-count-matches "X" input)
+(defun aoc/6/mark-positions (input w start-index)
+  (-let* ((h (/ (length input) w))
+          (current-index start-index)
+          (current-loc (cons (% current-index w) (/ current-index w)))
+          (current-dir '(0 . -1))
+          (seen-states '())
+          (loop nil)
+          )
+
+    (while current-loc
+      ;; (message "Current loc: %s" current-loc)
+      (aset input current-index ?X)
+      ;; TODO Test if hash is in seen-states first
+      ;; TODO If in seen-states then break out somehow
+      (let ((hash (aoc/6b/hash-state current-index current-dir)))
+        (if (-contains? seen-states hash)
+            (progn
+              (setq loop t)
+              (setq current-loc nil))
+          (push hash seen-states)
+          (let ((dir (aoc/6/calc-dir input w h current-loc current-dir)))
+            (setq current-dir dir)
+            (if (not current-dir)
+                (setq current-loc nil)
+              (setq current-loc (aoc/6/add-vecs current-loc current-dir))
+              (setq current-index (aoc/6/loc-to-index w current-loc))
+              ))))
+      )
+    (list input loop seen-states)
+    ))
+;; 6a
+(s-count-matches "X" (car (apply #'aoc/6/mark-positions (aoc/6/parse-input))))
+
+(defun aoc/6b/try-obstacle (board w start-index obstacle-index)
+  (aset board obstacle-index ?#)
+  ;; TODO Detect a loop by storing (position, direction). Loop if same (position, direction) found.
+  ;; (aoc/6/mark-positions board w start-index)
+  ;; (-let (((obstacle-output loop seen-states) (aoc/6/mark-positions (concat board) w start-index)))
+  ;;   (message "%s\n%s\n%s\n%s\n" board obstacle-output loop seen-states))
+  (cadr (aoc/6/mark-positions (concat board) w start-index))
+  ;; nil
+  )
+
+(defun aoc/6b/hash-state (index dir)
+  (+ (ash index 8)
+     (ash (1+ (cdr dir)) 4)
+     (1+ (car dir))))
+
+;; 6b
+(-let* (((initial-board w start-index) (aoc/6/parse-input))
+        ((solved-board loop) (aoc/6/mark-positions (concat initial-board) w start-index)))
+  (s-matched-positions-all "X" solved-board)
+  (->> (s-matched-positions-all "X" solved-board)
+     (mapcar #'car)
+     (-remove-item start-index)
+     (--map (aoc/6b/try-obstacle (concat initial-board) w start-index it))
+     (-flatten)
+     (length)
+     )
+  ;; (aoc/6b/try-obstacle (concat initial-board) w start-index 63)
   )
