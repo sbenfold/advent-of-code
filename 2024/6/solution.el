@@ -48,21 +48,18 @@
           (current-index start-index)
           (current-loc (cons (% current-index w) (/ current-index w)))
           (current-dir '(0 . -1))
-          (seen-states '())
+          (seen-states (ht-create))
           (loop nil)
           )
 
     (while current-loc
-      ;; (message "Current loc: %s" current-loc)
       (aset input current-index ?X)
-      ;; TODO Test if hash is in seen-states first
-      ;; TODO If in seen-states then break out somehow
       (let ((hash (aoc/6b/hash-state current-index current-dir)))
-        (if (-contains? seen-states hash)
+        (if (ht-contains? seen-states hash)
             (progn
               (setq loop t)
               (setq current-loc nil))
-          (push hash seen-states)
+          (ht-set! seen-states hash t)
           (let ((dir (aoc/6/calc-dir input w h current-loc current-dir)))
             (setq current-dir dir)
             (if (not current-dir)
@@ -71,7 +68,7 @@
               (setq current-index (aoc/6/loc-to-index w current-loc))
               ))))
       )
-    (list input loop seen-states)
+    (list input loop)
     ))
 ;; 6a
 (s-count-matches "X" (car (apply #'aoc/6/mark-positions (aoc/6/parse-input))))
