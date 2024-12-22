@@ -23,39 +23,35 @@
 (defun aoc/7/eval-line (operands operators)
   (aoc/7/-eval-line (car operands) (cdr operands) operators))
 
-(defun aoc/7/solve-line (line)
+(defun aoc/7/solve-line (operators line)
   (-let (((goal . operands) line))
     (when (-contains?
-           (->> (apply '-table-flat 'list (-repeat (1- (length operands)) (list '* '+)))
+           (->> (apply '-table-flat 'list (-repeat (1- (length operands)) operators))
               (--map (aoc/7/eval-line operands it))
               )
            goal)
       goal)
     ))
 
-(defun aoc/7/parse-input ()
+(defun aoc/7/solve (operators)
   (->> (f-read-text aoc/7/input-file)
      (s-lines)
      (-remove #'s-blank?)
      (-map #'aoc/7/parse-line)
-     (-map #'aoc/7/solve-line)
+     (--map (aoc/7/solve-line operators it))
      (-non-nil)
      (-sum)
      ))
 
-(aoc/7/parse-input)
+;; 7a
+(aoc/7/solve (list '* '+))
 
-;; (aoc/7/solve-line '(3267 81 40 27))
+(defun aoc/7/concat (x y)
+  (->> (list x y)
+     (-map #'number-to-string)
+     (-reduce #'concat)
+     (string-to-number)
+     ))
 
-;; ;; TODO How to evaluate a line with these operators? Apply and recurse? Reduce?
-;; (let ((input-len 3))
-;;   (->> (apply '-table-flat 'list (-repeat (1- input-len) (list '* '+)))
-;;      (--map (aoc/7/eval-line (list 81 40 27) it))
-;;      ))
-
-;; (apply '+ (list 0 81))
-
-;; (let ((operators (list '+ '+))
-;;       (operands (list 81 40 47))
-;;       (acc 0))
-;;   (apply (car operators) (list acc (car operands))))
+;; 7b
+(aoc/7/solve (list '* '+ #'aoc/7/concat))
