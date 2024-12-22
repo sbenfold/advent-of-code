@@ -5,27 +5,57 @@
 ;; (defconst aoc/8/input-file "input.txt")
 (defconst aoc/8/input-file "example-input.txt")
 
+(defun aoc/8/vec-add (a b)
+  (-zip-with #'+ a b))
+
+(defun aoc/8/vec-sub (a b)
+  (-zip-with #'- a b))
+
+(aoc/8/vec-add '(3 4) '(1 5))
+(aoc/8/vec-sub '(3 4) '(1 5))
+
+(defun aoc/8/gen-nodes-from-pair (w antennas)
+  (let* ((a1 (car antennas))
+         (a2 (cadr antennas))
+         (delta (aoc/8/vec-sub a2 a1)))
+    (list (aoc/8/vec-sub a1 delta)
+          (aoc/8/vec-add a2 delta))
+    ))
+
 (defun aoc/8/gen-nodes (w antennas)
-  ;; TODO Enumerate all combinations of antinode positions
-  ;;   Find delta = (B - A), then enumerate (A - delta), (B + delta)
+  (->>
+   (-powerset antennas)
+   (--filter (= 2 (length it)))
+   (--map (aoc/8/gen-nodes-from-pair w it))
+   )
   )
+
+(defun aoc/8/is-in-bounds (w h v)
+  (and (>= (car v) 0)
+       (< (car v) w)
+       (>= (cadr v) 0)
+       (< (cadr v) h)))
 
 (defun aoc/8/solve ()
   (let* ((raw-input (f-read-text aoc/8/input-file))
          (input (s-replace "\n" "" raw-input))
          (w (s-index-of "\n" raw-input))
+         (h (/ (length input) w))
          (all-antennas (ht-create))
          )
     (-each-indexed (-map #'identity input)
       (lambda (index x)
         (when (not (= x ?.))
-          (ht-set! all-antennas x (cons (cons (% index w) (/ index w))
+          (ht-set! all-antennas x (cons (list (% index w) (/ index w))
                                         (ht-get all-antennas x))))))
-    ;; TODO Call aoc/8/gen-nodes for each bucket in all-antennas
-    all-antennas
-    ;; TODO Filter out any outside grid
-    ;; TODO Unique
-    ;; TODO Sum
+    (->>
+     (ht-values all-antennas)
+     (--map (aoc/8/gen-nodes w it))
+     (-flatten-n 2)
+     (-distinct)
+     (--filter (aoc/8/is-in-bounds w h it))
+     (length)
+     )
     )
   )
 
