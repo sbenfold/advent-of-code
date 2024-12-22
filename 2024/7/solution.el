@@ -62,19 +62,16 @@
               (length (number-to-string y))))
      y))
 
-(aoc/7/concat-fast2 15 13)
+(defun aoc/7/concat-fast3 (x y)
+  (+ (* x
+        (expt 10
+              (aoc/7/digits y)))
+     y))
 
 (defun aoc/7/digits (x)
-  (cond ((zerop (/ x 10)) 1)
-        ((zerop (/ x 100)) 2)
-        ((zerop (/ x 1000)) 3)
-        ((zerop (/ x 10000)) 4)
-        (t nil)))
-
-(defun aoc/7/digits2 (x)
   (if (zerop x)
       0
-    (+ 1 (aoc/7/digits2 (/ x 10)))))
+    (+ 1 (aoc/7/digits (/ x 10)))))
 
 (defun aoc/7/-enum-line (acc goal operands operators)
   (if (null operands)
@@ -90,11 +87,6 @@
      operators)
     ))
 
-(mapcar (list '+ '*))
-(->> (aoc/7/-enum-line 81 3267 (list 40 27) (list '* '+ #'aoc/7/concat-fast))
-   (-flatten)
-   )
-
 (defun aoc/7/solve-line (operators line)
   (-let (((goal . operands) line))
     (->> (aoc/7/-enum-line (car operands)
@@ -107,9 +99,21 @@
     ))
 
 ;; 7b
-(aoc/7/solve (list '* '+ #'aoc/7/concat))
-(aoc/7/solve (list '* '+ #'aoc/7/concat-fast))
+;; (aoc/7/solve (list '* '+ #'aoc/7/concat))
+;; (aoc/7/solve (list '* '+ #'aoc/7/concat-fast))
 ;; (aoc/7/solve-line (list '* '+ #'aoc/7/concat-fast) (list 313997964 683 8 1 65 50 7 581 6 2))
 
-(require 'benchmark)
-(benchmark-elapse (garbage-collect))
+;; (require 'benchmark)
+;; (benchmark-elapse (garbage-collect))
+;; (benchmark-elapse (aoc/7/solve (list '* '+ #'aoc/7/concat)))
+;; (benchmark-elapse (aoc/7/solve (list '* '+ #'aoc/7/concat-fast)))
+;; (benchmark-elapse (aoc/7/solve (list '* '+ #'aoc/7/concat-fast2)))
+;; (benchmark-elapse (aoc/7/solve (list '* '+ #'aoc/7/concat-fast3)))
+;; (byte-compile 'aoc/7/solve)
+
+;; (aoc/7/concat-fast2 15 13)
+
+;; (mapcar (list '+ '*))
+;; (->> (aoc/7/-enum-line 81 3267 (list 40 27) (list '* '+ #'aoc/7/concat-fast))
+;;    (-flatten)
+;;    )
