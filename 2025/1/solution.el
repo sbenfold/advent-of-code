@@ -12,7 +12,7 @@
                                     ("R" . "+")))
                    (string-to-number)))
        (-reductions-from #'+ 50)
-       (-map (lambda (x) (% x 100)))
+       (--map (% it 100))
        (-count 'zerop)))
 
 (defun aoc/2025/1b (input)
