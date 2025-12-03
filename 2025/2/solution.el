@@ -20,24 +20,28 @@
                                 (s-right mid s))))))
        (-sum)))
 
-(defun aoc/2025/2/is-repeating (s len)
-  (if (eq (length s) len)
-      s
-    (s-shared-start (s-left len s)
-                    (aoc/2025/2/is-repeating (s-chop-left len s) len))))
+(defun aoc/2025/2/is-repeating (s sublen)
+  (when (zerop (% (length s) sublen))
+    (let* ((seq (number-sequence 0 (length s) sublen))
+           (pairs (-zip-pair seq (cdr seq))))
+      (eq
+       (->> pairs
+            (--map (funcall 'substring s (car it) (cdr it)))
+            (-reduce 's-shared-start)
+            (length)
+            ) sublen))))
+
 
 (defun aoc/2025/2/is-match (x n)
   (let* ((s (number-to-string x)))
-    (and (zerop (% (length s) n))
-         (eq (length (aoc/2025/2/is-repeating s n))
-             n))))
+    (aoc/2025/2/is-repeating s n)))
 
 (defun aoc/2025/2/is-match2 (x)
   (let* ((s (number-to-string x)))
     (->>
      (number-sequence 1 (/ (length s) 2))
-     (-any? (lambda (len) (aoc/2025/2/is-match x len)))
-     )))
+     (-any? (-partial 'aoc/2025/2/is-repeating s))))
+  )
 
 ;; 53481866137
 (defun aoc/2025/2b (filename)
@@ -53,5 +57,5 @@
        (-sum)
        ))
 
-(aoc/2025/2a "input.txt")
-(aoc/2025/2b "input.txt")
+(aoc/2025/2a "example.txt")
+(aoc/2025/2b "example.txt")
