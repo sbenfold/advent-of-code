@@ -2,24 +2,6 @@
 (require 'f)
 (require 's)
 
-;; 44487518055
-(defun aoc/2025/2a (filename)
-  (->> filename
-       (f-read)
-       (s-trim)
-       (s-split ",")
-       (--map (apply 'number-sequence (->> it
-                                           (s-split "-")
-                                           (-map 'string-to-number))))
-       (-flatten)
-       (-filter (lambda (x)
-                  (let* ((s (number-to-string x))
-                         (mid (/ (length s) 2)))
-                    (and (evenp (length s))
-                         (equal (s-left mid s)
-                                (s-right mid s))))))
-       (-sum)))
-
 (defun aoc/2025/2/is-repeating (s sublen)
   (when (zerop (% (length s) sublen))
     (let* ((seq (number-sequence 0 (length s) sublen))
@@ -31,20 +13,15 @@
             (length)
             ) sublen))))
 
-
-(defun aoc/2025/2/is-match (x n)
-  (let* ((s (number-to-string x)))
-    (aoc/2025/2/is-repeating s n)))
-
-(defun aoc/2025/2/is-match2 (x)
+(defun aoc/2025/2/is-match (x &optional max-segments)
   (let* ((s (number-to-string x)))
     (->>
-     (number-sequence 1 (/ (length s) 2))
-     (-any? (-partial 'aoc/2025/2/is-repeating s))))
-  )
+     (number-sequence 2 (or max-segments (length s)))
+     (--filter (zerop (% (length s) it)))
+     (--map (/ (length s) it))
+     (-any? (-partial 'aoc/2025/2/is-repeating s)))))
 
-;; 53481866137
-(defun aoc/2025/2b (filename)
+(defun aoc/2025/2/solve (filename &optional max-segments)
   (->> filename
        (f-read)
        (s-trim)
@@ -53,9 +30,16 @@
                                            (s-split "-")
                                            (-map 'string-to-number))))
        (-flatten)
-       (-filter 'aoc/2025/2/is-match2)
-       (-sum)
-       ))
+       (-filter (lambda (x) (aoc/2025/2/is-match x (or max-segments nil))))
+       (-sum)))
+
+;; 44487518055
+(defun aoc/2025/2a (filename)
+  (aoc/2025/2/solve filename 2))
+
+;; 53481866137
+(defun aoc/2025/2b (filename)
+  (aoc/2025/2/solve filename nil))
 
 (aoc/2025/2a "example.txt")
 (aoc/2025/2b "example.txt")
