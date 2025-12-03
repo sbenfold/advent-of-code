@@ -24,8 +24,7 @@
                      (number-sequence 2 (or max-segments (length s)))
                      (--filter (zerop (% (length s) it)))
                      (--map (/ (length s) it))
-                     (-any? (-partial 'aoc/2025/2/is-repeating s))))
-                  ))
+                     (-any? (-partial 'aoc/2025/2/is-repeating s))))))
        (-sum)))
 
 (defun aoc/2025/2a (filename)
