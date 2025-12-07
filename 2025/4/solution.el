@@ -3,13 +3,11 @@
 (require 's)
 
 (defun aoc/2025/4/get-adjacents (data pos dim)
-  (let* ((offsets (-flatten (-table 'cons (-iota 3 -1) (-iota 3 -1))))
-         (pos-offsets (--map (+ (* (car it) dim) (cdr it) pos) offsets))
-         )
-    (->> pos-offsets
-         (--map (eq (aref data it) ?@))
-         (-non-nil)
-         (length))))
+  (->> (-table '+ (-iota 3 (- dim) dim) (-iota 3 (- pos 1)))
+       (-flatten)
+       (--map (eq (aref data it) ?@))
+       (-non-nil)
+       (length)))
 
 (defun aoc/2025/4/a (filename)
   (let* ((lines (->> filename (f-read) (s-trim) (s-lines)))
@@ -25,6 +23,7 @@
      (--map (aoc/2025/4/get-adjacents data-padded it (+ dim 2)))
      (--filter (< it 5))
      (length))))
+
 (aoc/2025/4/a "example2.txt")
 (aoc/2025/4/a "example.txt")
 (aoc/2025/4/a "input.txt")
