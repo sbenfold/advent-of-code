@@ -3,11 +3,9 @@
 (require 's)
 
 (defun aoc/2025/4/get-adjacents (data pos dim)
-  (->> (-table '+ (-iota 3 (- dim) dim) (-iota 3 (- pos 1)))
-       (-flatten)
+  (->> (-table-flat '+ (-iota 3 (- dim) dim) (-iota 3 (- pos 1)))
        (--map (eq (aref data it) ?@))
-       (-non-nil)
-       (length)))
+       (-count 'identity)))
 
 (defun aoc/2025/4/a (filename)
   (let* ((lines (->> filename (f-read) (s-trim) (s-lines)))
