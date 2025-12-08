@@ -5,11 +5,11 @@
 (defun aoc/2025/4/read-board (filename)
   (let* ((lines (->> filename (f-read) (s-trim) (s-lines)))
          (dim (length (car lines)))
-         (pad-line (s-repeat (+ dim 2) "."))
          (data (->> lines
                     (--map (s-wrap it "."))
                     (s-join "")))
-         (data-padded (concat pad-line data pad-line))
+         (data-padded (s-wrap data
+                              (s-repeat (+ dim 2) ".")))
          (initial-num (length (s-matched-positions-all "@" data))))
     (list data-padded dim initial-num)))
 
